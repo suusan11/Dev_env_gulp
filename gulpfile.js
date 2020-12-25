@@ -1,7 +1,9 @@
 // gulpプラグインの読み込み
 const { src, dest, watch, series } = require('gulp');
 // Sassをコンパイルするプラグインの読み込み
-const sass = require('gulp-sass');
+const gulpSass = require('gulp-sass');
+const Fibers = require('fibers');
+gulpSass.compiler = require('sass'); //Dart Sassを指定
 const plumber = require('gulp-plumber'); //エラー時の強制終了を防止
 const notify = require('gulp-notify'); //エラー発生時にデスクトップ通知する
 const postcss = require('gulp-postcss'); //autoprefixerとセット
@@ -14,12 +16,13 @@ const sassCompile = () => {
       //エラーが出てもgulpを止めないけどエラー表示はさせる
       .pipe(plumber({ errorHandler: notify.onError("Error: <%= error.message %>") }))
       // Sassのコンパイルを実行
-      .pipe(sass({
+      .pipe(gulpSass({
+        fiber: Fibers,
         outputStyle: 'expanded',　//css出力方法
       })
         // Sassのコンパイルエラーを表示
         // (これがないと自動的に止まってしまう)
-        .on('error', sass.logError))
+        .on('error', gulpSass.logError))
       //ベンダープレフィックスの自動付与
       .pipe(postcss([autoprefixer({
         overrideBrowserslist: ["last 2 versions", "ie >= 11", "Android >= 4"],
